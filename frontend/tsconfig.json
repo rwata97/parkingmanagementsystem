@@ -1,0 +1,25 @@
+{
+  //"extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "baseUrl": ".",
+    "paths": { "@/*": ["src/*"], "@/mocks/*": ["_mocks_/*"] },
+
+    // JSX support
+    "jsx": "react-jsx", // Next.js: use "preserve"
+
+    // Make sure DOM types are present
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+
+    // Usual React settings
+    "module": "ESNext",
+    "target": "ESNext",
+    "moduleResolution": "Bundler", // or "NodeNext"/"Node"
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+
+    "types": ["vitest/globals", "@testing-library/jest-dom", "vite/client"]
+  },
+  "include": ["src", "_mocks_", "vite.config.mts", "**/*.tsx", "**/*.ts"]
+}
