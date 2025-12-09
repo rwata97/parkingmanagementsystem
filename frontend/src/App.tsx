@@ -1,11 +1,8 @@
-import { useState } from "react";
 import { router } from "@/app/RoutesList";
 import { RouterProvider } from "react-router-dom";
-import { AuthProvider } from "@/components/auth/AuthProvider"; // ⬅️ adjust path
+import { AuthProvider } from "@/components/auth/AuthProvider";
 
 function App() {
-  const [count, setCount] = useState(0);
-
   return (
     <>
       <AuthProvider>
