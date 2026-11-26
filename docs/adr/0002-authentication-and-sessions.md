@@ -7,7 +7,7 @@
 
 The Community Parking Management System needs email/password account authentication and persistent browser sessions for resident and administrator workflows. The API must remain the authority for authenticated identity, resident ownership, and administrator permissions.
 
-The frontend currently simulates authentication with MSW and hand-written mock code. The mock generates a Base64 token, returns it in a cookie, and stores mock user data in browser `localStorage`. It is development/test behavior, not production authentication. There is no production API or authentication library in the repository yet.
+The frontend currently simulates authentication with MSW and hand-written mock code during browser development. The mock generates a Base64 token, returns it in a cookie, and stores mock user data in browser `localStorage`. It is not production authentication. Frontend tests currently mock API functions directly rather than running the MSW browser worker. There is no production API or authentication library in the repository yet.
 
 The project has one developer with TypeScript experience. The planned application database is PostgreSQL. The decision is to use an authentication library for production rather than build the credential and session mechanics directly in application code.
 
@@ -33,7 +33,7 @@ Passport.js provides authentication middleware and strategies. Its documented se
 - Better Auth's user ID is the resident identity used by registrations and assignments. V1 has no approved-resident roster or administrator approval step.
 - Better Auth's Express 5 integration and middleware ordering must be verified during implementation, as recorded in ADR 0004.
 - Authentication and session checks depend on PostgreSQL availability. A separate session store is not part of this decision.
-- The current MSW mock may continue to support frontend development and tests, but its token and storage behavior must not be treated as the production security design.
+- The current MSW mock supports browser-side frontend development only; its token and storage behavior must not be treated as the production security design. Frontend tests currently mock API functions directly.
 
 ## Details Deferred
 

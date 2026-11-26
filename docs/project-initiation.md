@@ -43,13 +43,13 @@ Provide a web application that helps a residential community manage quarterly pa
 - Only spots marked available are eligible for raffle assignment; reserved or maintenance spots are excluded.
 - Administrators are authorized to view resident information, manage cycle registration state, and run raffles.
 - The backend applies the agreed allocation rules: prior-cycle non-winners first, random tie-breaking, and no assignment beyond available spots.
-- Seeded mock data and MSW remain available for frontend development and automated testing; PostgreSQL is the application’s persistent data store.
+- Seeded mock data and MSW support browser-side frontend development; current frontend tests mock API functions directly. PostgreSQL is the application's persistent data store.
 - Users will access the application through a modern web browser with an internet connection.
 
 ## 4. Constraints
 
 - The frontend, Node.js/TypeScript REST API, and PostgreSQL database must be available and correctly configured for end-to-end use.
-- API schemas and generated OpenAPI documentation must remain aligned with frontend integrations and MSW scenarios; route-specific schemas remain contract work.
+- API schemas and generated OpenAPI documentation must remain aligned with frontend integrations and development MSW scenarios; route-specific schemas remain contract work.
 - Better Auth's schema must support the app-managed single role and the existing user-to-registration relationship. Account deletion must preserve a non-login user tombstone for historical references.
 - Database schema changes must preserve resident, raffle, registration, and assignment integrity.
 - Raffle processing must maintain assignment consistency when requests overlap or fail.
@@ -90,7 +90,7 @@ Provide a web application that helps a residential community manage quarterly pa
 - **Data storage:** Use PostgreSQL with Drizzle ORM. Keep Better Auth and application schema in one reviewed, versioned migration workflow. Use Better Auth user IDs as resident IDs; store the optional single vehicle in a one-to-one table and preserve registration/assignment history.
 - **Authentication and authorization:** Use Better Auth for email/password authentication and database-backed sessions. Open signup creates a resident account without mandatory email verification. Server-side authorization controls roles and operations. Resident account deletion removes credentials and personal details while retaining a non-login user tombstone.
 - **Raffle processing:** Automatically provision quarterly cycles; an administrator starts, may close/reopen before the deadline, and manually runs each cycle after registration closes. Use one PostgreSQL transaction, a cycle row lock, unique assignment constraints, stored spot status, and stored-result retry behavior. Empty runs return `409 Conflict`; v1 does not support result correction or reruns.
-- **Development and testing:** Use MSW and seeded data for frontend development and automated tests. Use Vitest and Testing Library for frontend tests, and API, database integration, and end-to-end checks for critical workflows.
+- **Development and testing:** Use MSW and seeded data to simulate API behavior during frontend development. Current frontend tests use Vitest and Testing Library with direct API-function mocks; backend tests use Node's built-in test runner. Add PostgreSQL integration and end-to-end checks for critical workflows as backend capabilities mature.
 - **Deployment and operations:** Deploy the frontend and API with secure configuration and a provisioned PostgreSQL database. Define CI/CD, database migration, monitoring, backup, and recovery procedures as part of production readiness.
 
 These technology and integrity choices are recorded in [ADRs 0001–0005](adr/0001-technology-baseline.md). Proposed work outside v1 is tracked in the [Future Enhancements / Product Roadmap](future-enhancements.md); unresolved v1 decisions remain in [Open Questions](open-questions.md).

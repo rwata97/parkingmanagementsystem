@@ -28,7 +28,7 @@ Open requirements and design questions are tracked separately in [open-questions
 
 Proposed functionality outside v1 is tracked in the [Future Enhancements / Product Roadmap](future-enhancements.md). Roadmap entries do not authorize implementation.
 
-MSW is a frontend development and test aid. In production, the API is authoritative for identity, permissions, raffle eligibility, and all persistent business data.
+MSW is a browser-side frontend development aid. Current frontend tests mock API functions directly. In production, the API is authoritative for identity, permissions, raffle eligibility, and all persistent business data.
 
 ## 3. Architecture components and responsibilities
 
@@ -37,7 +37,7 @@ MSW is a frontend development and test aid. In production, the API is authoritat
 | Web application | Resident and administrator user experience; route selection; form interaction; loading, success, and error feedback | Existing React and TypeScript SPA built with Vite and React Router; TanStack Query manages remote state; shared hooks call a common fetch helper. Client route guards improve navigation but do not replace API authorization. |
 | REST API | Validate requests, authenticate users, authorize operations, apply domain rules, and coordinate persistence | Express 5 on Node.js/TypeScript with express-zod-api, organized using MVC with a service boundary. The React frontend owns the View; backend Controllers validate/map JSON contracts, Services implement use cases, and Drizzle-backed Models own persistence. Better Auth handles email/password authentication and sessions. |
 | PostgreSQL | Durable source of truth and integrity across auth records, users, vehicles, spots, raffle cycles, registrations, results, assignments, and cycle audit | Stores Better Auth user, account, verification, and session data alongside app-managed roles and domain data. Drizzle schema definitions and reviewed versioned migrations manage all tables in one workflow. Foreign keys, uniqueness constraints, and transactions protect relationships and assignment rules. |
-| MSW and mock data | Simulate API responses for frontend development and tests | Retain as a development/testing boundary; avoid using browser storage or mock state as production persistence. |
+| MSW and mock data | Simulate API responses during browser-based frontend development | Retain as a development boundary; current frontend tests mock API functions directly. Do not use browser storage or mock state as production persistence. |
 | Delivery and operations | Build, deploy, configure, observe, back up, and recover the service | CI/CD, separate environment configuration, managed or hosted PostgreSQL, secret management, health and error monitoring, backups, and documented restore procedures. |
 
 ### 3.1 MVC organization and request flow
@@ -157,7 +157,7 @@ Hosting provider, regions, availability targets, recovery time and recovery poin
 
 ## 10. Verification strategy
 
-- **Frontend tests:** retain Vitest and Testing Library coverage for components, hooks, route behavior, and user-visible loading/error/success states. Use MSW for repeatable API scenarios.
+- **Frontend tests:** use Vitest and Testing Library for components, hooks, route behavior, and user-visible loading/error/success states. Current tests mock API functions directly; the browser MSW worker is for development only.
 - **API unit and contract tests:** cover express-zod-api/Zod 4 validation, Problem Details normalization, generated OpenAPI consistency, Better Auth integration and middleware ordering, authorization, account deletion, cycle transitions, and raffle policy.
 - **Database integration tests:** verify constraints, migrations, transaction rollback, uniqueness, and concurrent raffle protection against PostgreSQL.
 - **End-to-end tests:** exercise open signup without email verification, password reset, resident account deletion with history retention, enrollment, history and assignment views, cycle start/close/reopen, and administrator raffle execution.
@@ -170,7 +170,7 @@ Test fixtures and policies must distinguish established requirements from decisi
 
 | Risk | Architectural response |
 |---|---|
-| Frontend and API contract drift | Generate OpenAPI from express-zod-api/Zod 4 endpoint definitions, exercise the contract in integration tests, and keep MSW scenarios aligned with production behavior. |
+| Frontend and API contract drift | Generate OpenAPI from express-zod-api/Zod 4 endpoint definitions, exercise the contract in integration tests, and keep browser-development MSW handlers aligned with production behavior. |
 | Account deletion damages raffle history | Retain the user ID as a non-login tombstone and remove only credentials and personal details. |
 | Concurrent or repeated raffle execution | Lock the cycle row and use assignment uniqueness constraints inside one transaction; return the stored result for a retry or concurrent request against a completed cycle. |
 | Authorization gaps expose resident data | Centralize server-side access checks and test each role and ownership boundary. |
@@ -183,9 +183,9 @@ Test fixtures and policies must distinguish established requirements from decisi
 1. **Initiation and architecture:** confirm workflows and policy decisions; approve the API contract, domain model, security model, deployment topology, and acceptance criteria.
 2. **Backend foundation:** establish Express 5, express-zod-api/Zod 4, Better Auth, Drizzle schema and migrations, `/api/v1` conventions, role enforcement, and Problem Details normalization. Verify Better Auth middleware ordering and error normalization.
 3. **Core parking and raffle capabilities:** implement preloaded inventory, automatic cycle provisioning, audited cycle actions, registration, manual raffle execution, account deletion tombstones, assignment history, and transactional integrity.
-4. **Frontend integration:** replace mock-backed production calls with the real API while retaining MSW for tests; add consistent user-facing error and loading feedback.
+4. **Frontend integration:** replace mock-backed production calls with the real API while retaining MSW for browser development; current tests continue to mock API functions directly. Add consistent user-facing error and loading feedback.
 5. **System validation and production readiness:** run database integration, end-to-end, and security checks; provision hosting, observability, backups, restore procedures, and operational runbooks.
 
 ## 13. Assumptions and decisions to confirm
 
-This draft assumes one community, single-role resident or administrator accounts, quarterly cycles, React, Express 5/Node.js/TypeScript, express-zod-api/Zod 4, Better Auth, Drizzle, PostgreSQL, server-enforced authorization, and MSW for frontend development and tests. V1 has open resident signup without mandatory email verification, no resident approval roster, manual raffle execution, and non-login tombstones for self-deleted residents. Remaining decisions are tracked in [Open Questions](open-questions.md); proposed out-of-scope features are tracked in [the roadmap](future-enhancements.md).
+This draft assumes one community, single-role resident or administrator accounts, quarterly cycles, React, Express 5/Node.js/TypeScript, express-zod-api/Zod 4, Better Auth, Drizzle, PostgreSQL, server-enforced authorization, and MSW for browser-side frontend development. Current frontend tests mock API functions directly. V1 has open resident signup without mandatory email verification, no resident approval roster, manual raffle execution, and non-login tombstones for self-deleted residents. Remaining decisions are tracked in [Open Questions](open-questions.md); proposed out-of-scope features are tracked in [the roadmap](future-enhancements.md).

@@ -14,10 +14,10 @@ Residents can register for quarterly parking raffles, and admins can run the raf
 
 - **React + TypeScript**
 - **React Query** – server state management + caching
-- **Mock Service Worker (MSW)** – full API simulation
+- **Mock Service Worker (MSW)** – browser-side API simulation during development
 - **Atomic Design** for components
 - **Custom Hooks** for business logic encapsulation
-- **Vitest + RTL** for unit & integration testing
+- **Vitest + React Testing Library** for frontend tests (current tests mock API functions directly)
 - **Vite** as the build tool
 
 ---
@@ -54,7 +54,7 @@ npm run test:coverage
 ## Design Decisions
 
 - React Query for consistent async workflows, caching, invalidation
-- MSW to replicate real backend behavior during development
+- MSW to simulate API behavior during browser development
 - Custom hooks to isolate business logic and improve reusability
 - Atomic component structure for clean, scalable UI design
 - These choices make the application highly testable, modular, and easy to extend.
@@ -67,9 +67,9 @@ npm run test:coverage
 
 ## 📈 Future Improvements
 
-- Replace MSW with a real backend service
+- Connect production workflows to the real backend while retaining MSW for browser development
 - Implement optimistic updates for a smoother UX
 - Improve UI styling, animations, and component cohesion
 - Increase automated test coverage (currently ~47%) by expanding tests across UI components, error states, and integration flows.
   - Current tests focus on core business logic and custom hooks
-  - Next steps include adding component tests using MSW, testing edge cases, and improving overall reliability
+  - Next steps include adding component tests for error states and edge cases. Current tests mock API functions directly; MSW is not configured as the Vitest test server.

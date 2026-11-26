@@ -64,6 +64,30 @@ The v1 domain schema preserves the mock's identity relationship: the Better Auth
 - [Better Auth: Drizzle adapter](https://better-auth.com/docs/adapters/drizzle)
 - [Drizzle ORM: Migrations](https://orm.drizzle.team/docs/migrations)
 
+## Decision Addendum — Frontend Architecture and Testing (2026-11-26)
+
+### Decisions
+
+- Use **TanStack React Query** for API-backed server state: fetching, caching, mutations, and invalidating dependent queries. It is not the general-purpose store for transient client or presentation state.
+- Use **Mock Service Worker (MSW)** as a browser-side API simulator during frontend development. It is not the production API and is not the configured Vitest test server. Current frontend tests mock API functions directly.
+- Keep the frontend's adapted **Atomic Design** hierarchy under `frontend/src/components/`: `atoms/`, `molecules/`, `organisms/`, and `pages/`. Keep authentication-specific components in `auth/`; use the categories pragmatically rather than forcing every component into one.
+- Separate state by responsibility: TanStack Query owns remote API data; the auth context exposes the current user derived from the auth query; React component state owns transient form and UI state. No global client-state library is required without a concrete need. Zustand is present as a dependency but is not currently used.
+- Use **Vitest and Testing Library** for frontend tests, with direct API-function mocks as the current pattern. Use Node's built-in test runner for backend tests. As backend capabilities mature, add PostgreSQL integration coverage and end-to-end checks for critical user workflows. No numeric coverage threshold or end-to-end test framework is selected by this decision.
+- Organize frontend code by responsibility: `src/app/` for app routing, `src/components/` for UI, `src/hooks/` for reusable hooks, and `src/lib/` for shared utilities. Keep browser MSW setup and handlers in `frontend/msw/`, mock fixtures in `frontend/_mocks_/`, and tests alongside the relevant source files in `src/`. Backend organization remains governed by [ADR 0005](0005-backend-mvc-organization.md).
+
+### Rationale and consequences
+
+- TanStack Query is already used across auth, raffle, resident, and spot hooks; mutations invalidate queries whose data may have changed.
+- The existing browser MSW worker starts in development mode, while Vitest tests mock API functions. Keeping these roles explicit avoids treating simulated browser behavior as production behavior or test coverage.
+- The existing component hierarchy supports reuse from small controls through composed screens. The `pages/` and `auth/` folders adapt the pattern to the application's route and authentication needs.
+- This decision documents current frontend organization and testing direction; it does not require a directory reorganization, a new state library, or a new test tool.
+
+### Alternatives considered
+
+- A single global client-state store could hold both API and UI state, but would duplicate the caching and synchronization responsibilities already handled by TanStack Query.
+- Running MSW as the standard frontend test server could provide request-level scenarios; the current tests instead mock API functions directly, and adopting MSW for tests is not part of this decision.
+- A feature-first component layout is possible, but the existing reusable component tiers are retained for now.
+
 ## References
 
 - [React: Add React to an Existing Project](https://react.dev/learn/add-react-to-an-existing-project)
